@@ -6,12 +6,12 @@ import os
 # Model ve scaler yükle
 # app.py, notebooks/ klasöründeki .pkl dosyalarını referans alır
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH  = os.path.join(BASE_DIR, '..', 'notebooks', 'model_classification.pkl')
-SCALER_PATH = os.path.join(BASE_DIR, '..', 'notebooks', 'scaler.pkl')
+MODEL_PATH = os.path.join(BASE_DIR, 'notebooks', 'model_mvp.pkl')
+SCALER_PATH = os.path.join(BASE_DIR, 'notebooks', 'scaler.pkl')
 
 @st.cache_resource
 def load_model():
-    model  = joblib.load(MODEL_PATH)
+    model = joblib.load(MODEL_PATH)
     scaler = joblib.load(SCALER_PATH)
     return model, scaler
 
@@ -28,42 +28,28 @@ label_maps = {
 result_map = {0: '🟠 Inconclusive', 1: '🔴 Abnormal', 2: '🟢 Normal'}
 
 # Sayfa ayarları
-st.set_page_config(page_title='Hasta Test Sonucu Tahmini', page_icon='🏥', layout='centered')
+st.set_page_config(page_title='Hasta Fatura Tahmini', page_icon='🏥', layout='centered')
 
-st.title('🏥 Hasta Test Sonucu Tahmini')
-st.markdown('Hasta bilgilerini girerek test sonucunu tahmin edin.')
+st.title('🏥 Hasta Fatura Tahmini')
+st.markdown('Hastalık adı girerek fatura tutarını tahmin edin.')
 st.divider()
 
 col1, col2 = st.columns(2)
 
 with col1:
-    age            = st.number_input('Yaş', min_value=1, max_value=120, value=45)
     billing        = st.number_input('Fatura Tutarı (USD)', min_value=0.0, value=15000.0, step=100.0)
-    yatis_gun      = st.number_input('Yatış Süresi (gün)', min_value=1, max_value=60, value=5)
-    admission_ay   = st.selectbox('Başvuru Ayı', list(range(1, 13)))
-    gender         = st.selectbox('Cinsiyet', list(label_maps['Gender'].keys()))
-    blood_type     = st.selectbox('Kan Grubu', list(label_maps['Blood Type'].keys()))
+ 
 
 with col2:
     condition      = st.selectbox('Hastalık', list(label_maps['Medical Condition'].keys()))
-    insurance      = st.selectbox('Sigorta', list(label_maps['Insurance Provider'].keys()))
-    admission_type = st.selectbox('Başvuru Tipi', list(label_maps['Admission Type'].keys()))
-    medication     = st.selectbox('İlaç', list(label_maps['Medication'].keys()))
 
 st.divider()
 
 if st.button('Tahmin Et', use_container_width=True, type='primary'):
     features = np.array([[
-        age,
-        yatis_gun,
         billing,
-        admission_ay,
-        label_maps['Gender'][gender],
-        label_maps['Blood Type'][blood_type],
         label_maps['Medical Condition'][condition],
-        label_maps['Insurance Provider'][insurance],
-        label_maps['Admission Type'][admission_type],
-        label_maps['Medication'][medication],
+        
     ]])
 
     features_sc = scaler.transform(features)
